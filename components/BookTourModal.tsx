@@ -38,8 +38,6 @@ export const BookTourModal: React.FC<Props> = ({ visible, onClose, propId, unit 
     name.trim() &&
     email.trim() &&
     phone.trim() &&
-    date &&
-    time &&
     !submitting;
 
   const reset = () => {
@@ -55,11 +53,14 @@ export const BookTourModal: React.FC<Props> = ({ visible, onClose, propId, unit 
     if (!canSubmit || !unit) return;
     try {
       setSubmitting(true);
-      const tourDate = new Date(date);
-      // merge selected time hours/minutes into date
-      if (time) {
-        tourDate.setHours(time.getHours());
-        tourDate.setMinutes(time.getMinutes());
+      let preferredIso: string | null = null;
+      if (date) {
+        const tourDate = new Date(date);
+        if (time) {
+          tourDate.setHours(time.getHours());
+          tourDate.setMinutes(time.getMinutes());
+        }
+        preferredIso = tourDate.toISOString();
       }
 
       await addDoc(collection(db, 'properties', propId, 'tours'), {
@@ -68,7 +69,7 @@ export const BookTourModal: React.FC<Props> = ({ visible, onClose, propId, unit 
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
-        preferredDateTime: tourDate.toISOString(),
+        preferredDateTime: preferredIso,
         notes: notes.trim(),
         createdAt: serverTimestamp(),
       });
@@ -84,7 +85,7 @@ export const BookTourModal: React.FC<Props> = ({ visible, onClose, propId, unit 
             name: name.trim(),
             email: email.trim(),
             phone: phone.trim(),
-            preferredDateTime: tourDate.toISOString(),
+            preferredDateTime: preferredIso,
             notes: notes.trim(),
           }),
         });
