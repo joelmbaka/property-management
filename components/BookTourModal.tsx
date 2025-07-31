@@ -76,7 +76,7 @@ export const BookTourModal: React.FC<Props> = ({ visible, onClose, propId, unit 
 
       // fire email via Vercel function (non-blocking & logged)
       try {
-        const emailRes = await fetch('https://property-management-teamjoe.vercel.app/api/book-tour', {
+        const emailRes = await fetch('https://property-management-snowy-rho.vercel.app/api/book-tour', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
