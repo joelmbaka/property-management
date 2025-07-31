@@ -40,3 +40,5 @@ app-example
 
 # Firebase admin credentials
 property-management-app-fc397-firebase-adminsdk-*.json
+
+.vercel

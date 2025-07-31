@@ -73,20 +73,29 @@ export const BookTourModal: React.FC<Props> = ({ visible, onClose, propId, unit 
         createdAt: serverTimestamp(),
       });
 
-      // fire email via Vercel function (non-blocking)
-      fetch('https://property-management-kgbw00431-teamjoe.vercel.app/api/book-tour', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          propertyId: propId,
-          unitNumber: unit.number,
-          name: name.trim(),
-          email: email.trim(),
-          phone: phone.trim(),
-          preferredDateTime: tourDate.toISOString(),
-          notes: notes.trim(),
-        }),
-      }).catch(() => {});
+      // fire email via Vercel function (non-blocking & logged)
+      try {
+        const emailRes = await fetch('https://property-management-teamjoe.vercel.app/api/book-tour', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            propertyId: propId,
+            unitNumber: unit.number,
+            name: name.trim(),
+            email: email.trim(),
+            phone: phone.trim(),
+            preferredDateTime: tourDate.toISOString(),
+            notes: notes.trim(),
+          }),
+        });
+        console.log('Email function status', emailRes.status);
+        const emailJson = await emailRes.json().catch(() => ({}));
+        console.log('Email function response', emailJson);
+      } catch (err) {
+        console.error('Email API call failed', err);
+      }
+      
+
 
       reset();
       onClose();
