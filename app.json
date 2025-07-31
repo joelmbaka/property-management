@@ -35,7 +35,10 @@
         }
       ]
     ],
-    "experiments": {
+    "extra": {
+        "apiEndpoint": "https://property-management-snowy-rho.vercel.app/api/book-tour"
+      },
+      "experiments": {
       "typedRoutes": true
     }
   }

@@ -10,6 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Constants from 'expo-constants';
 import { AppButton } from './AppButton';
 import { db } from '../lib/firebase';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
@@ -75,8 +76,9 @@ export const BookTourModal: React.FC<Props> = ({ visible, onClose, propId, unit 
       });
 
       // fire email via Vercel function (non-blocking & logged)
+      const apiUrl = (Constants as any)?.expoConfig?.extra?.apiEndpoint ?? 'https://property-management-snowy-rho.vercel.app/api/book-tour';
       try {
-        const emailRes = await fetch('https://property-management-snowy-rho.vercel.app/api/book-tour', {
+        const emailRes = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
