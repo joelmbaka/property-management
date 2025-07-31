@@ -1,4 +1,7 @@
 import { Resend } from 'resend';
+import { Expo } from 'expo-server-sdk';
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
 
 export default async function handler(req, res) {
   // CORS
@@ -49,8 +52,40 @@ export default async function handler(req, res) {
       html,
       reply_to: email,
     });
+
+    // push notifications to all registered device tokens in Firestore
+    try {
+      // initialize admin SDK lazily
+      if (!getApps().length) {
+        initializeApp({
+          credential: cert({
+            projectId: process.env.FIREBASE_PROJECT_ID,
+            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+            privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+          }),
+        });
+      }
+      const adminDb = getFirestore();
+      const snapshot = await adminDb.collection('deviceTokens').get();
+      const tokens = snapshot.docs
+        .map((d) => d.id)
+        .filter((t) => Expo.isExpoPushToken(t));
+      if (tokens.length) {
+        const expo = new Expo();
+        const messages = tokens.map((to) => ({
+          to,
+          sound: 'default',
+          title: 'New Tour Booking',
+          body: `${name} booked unit ${unitNumber}`,
+          data: { propertyId, unitNumber, name },
+        }));
+        await expo.sendPushNotificationsAsync(messages);
+      }
+    } catch (pushErr) {
+      console.error('Push notification error', pushErr);
+    }
     return res.status(200).json({ ok: true });
-  } catch (e) {
+    } catch (e) {
     console.error('Resend error', e);
     return res.status(500).json({ error: 'Failed to send email' });
   }

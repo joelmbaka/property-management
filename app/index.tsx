@@ -2,7 +2,8 @@ import React from "react";
 import { SafeAreaView, FlatList, StatusBar, View, Pressable, Text } from "react-native";
 import { PropertyCard, Property } from "../components/PropertyCard";
 import { Link } from "expo-router";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, setDoc, doc, serverTimestamp } from "firebase/firestore";
+import { registerForPushNotificationsAsync } from "../lib/notifications";
 import { db } from "../lib/firebase";
 
 export default function Index() {
@@ -25,6 +26,20 @@ export default function Index() {
         console.error("Failed to load properties", e);
       }
     })();
+  }, []);
+
+  // register device push token once
+  React.useEffect(() => {
+    registerForPushNotificationsAsync().then(async (token) => {
+      if (token) {
+        try {
+          await setDoc(doc(db, 'deviceTokens', token), { token, createdAt: serverTimestamp() }, { merge: true });
+          console.log('Push token registered', token);
+        } catch (e) {
+          console.error('Failed to save push token', e);
+        }
+      }
+    });
   }, []);
 
   const filtered = bedFilter === 'all' ? properties : properties.filter((p) =>

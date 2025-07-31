@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.makajoe26.propertymanagementapp"
     },
     "web": {
       "bundler": "metro",
@@ -36,9 +37,13 @@
       ]
     ],
     "extra": {
-        "apiEndpoint": "https://property-management-snowy-rho.vercel.app/api/book-tour"
-      },
-      "experiments": {
+      "apiEndpoint": "https://property-management-snowy-rho.vercel.app/api/book-tour",
+      "router": {},
+      "eas": {
+        "projectId": "84d39208-1108-45af-83d6-a2895316481c"
+      }
+    },
+    "experiments": {
       "typedRoutes": true
     }
   }
