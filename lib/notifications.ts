@@ -4,8 +4,7 @@ import { Platform } from 'react-native';
 
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
   if (!Constants.isDevice) {
-    console.log('Must use physical device for Push Notifications');
-    return null;
+    console.log('Warning: running on simulator/emulator – push token may not be available. Attempting anyway.');
   }
 
   const { status: existingStatus } = await Notifications.getPermissionsAsync();
@@ -19,6 +18,12 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
     return null;
   }
 
-  const tokenData = await Notifications.getExpoPushTokenAsync();
-  return tokenData.data;
+  try {
+    const tokenData = await Notifications.getExpoPushTokenAsync();
+    return tokenData.data;
+  } catch (err) {
+    console.error('Failed to get Expo push token', err);
+    return null;
+  }
+  
 }

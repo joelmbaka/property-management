@@ -4,6 +4,7 @@ import { PropertyCard, Property } from "../components/PropertyCard";
 import { Link } from "expo-router";
 import { collection, getDocs, setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { registerForPushNotificationsAsync } from "../lib/notifications";
+import { Platform } from 'react-native';
 import { db } from "../lib/firebase";
 
 export default function Index() {
@@ -30,16 +31,23 @@ export default function Index() {
 
   // register device push token once
   React.useEffect(() => {
-    registerForPushNotificationsAsync().then(async (token) => {
-      if (token) {
-        try {
-          await setDoc(doc(db, 'deviceTokens', token), { token, createdAt: serverTimestamp() }, { merge: true });
-          console.log('Push token registered', token);
-        } catch (e) {
-          console.error('Failed to save push token', e);
+    if (Platform.OS === 'android' || Platform.OS === 'ios') {
+      console.log('Requesting Expo push token...');
+      registerForPushNotificationsAsync().then(async (token) => {
+        if (token) {
+          try {
+            await setDoc(doc(db, 'deviceTokens', token), { token, createdAt: serverTimestamp() }, { merge: true });
+            console.log('Push token registered', token);
+          } catch (e) {
+            console.error('Failed to save push token', e);
+          }
+        } else {
+          console.warn('No push token returned');
         }
-      }
-    });
+      });
+    } else {
+      console.log('Skip push token registration on web');
+    }
   }, []);
 
   const filtered = bedFilter === 'all' ? properties : properties.filter((p) =>

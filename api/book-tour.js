@@ -70,6 +70,7 @@ export default async function handler(req, res) {
       const tokens = snapshot.docs
         .map((d) => d.id)
         .filter((t) => Expo.isExpoPushToken(t));
+      console.log('Device tokens fetched:', tokens);
       if (tokens.length) {
         const expo = new Expo();
         const messages = tokens.map((to) => ({
@@ -79,7 +80,8 @@ export default async function handler(req, res) {
           body: `${name} booked unit ${unitNumber}`,
           data: { propertyId, unitNumber, name },
         }));
-        await expo.sendPushNotificationsAsync(messages);
+        const receipts = await expo.sendPushNotificationsAsync(messages);
+        console.log('Expo push receipts:', receipts);
       }
     } catch (pushErr) {
       console.error('Push notification error', pushErr);
