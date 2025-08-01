@@ -5,6 +5,7 @@ import { Link } from "expo-router";
 import { collection, getDocs, setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { registerForPushNotificationsAsync } from "../lib/notifications";
 import { Platform } from 'react-native';
+import * as Application from 'expo-application';
 import { db } from "../lib/firebase";
 
 export default function Index() {
@@ -32,6 +33,7 @@ export default function Index() {
   // register device push token once
   React.useEffect(() => {
     if (Platform.OS === 'android' || Platform.OS === 'ios') {
+      console.log('Running package:', Application.applicationId);
       console.log('Requesting Expo push token...');
       registerForPushNotificationsAsync().then(async (token) => {
         if (token) {
