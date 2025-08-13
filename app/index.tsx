@@ -5,7 +5,7 @@ import { Link, useRouter } from "expo-router";
 import { useAuth } from "../lib/AuthProvider";
 import { collection, getDocs, setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { registerForPushNotificationsAsync } from "../lib/notifications";
-import { Platform } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
 import * as Application from 'expo-application';
 import { db } from "../lib/firebase";
 
@@ -14,6 +14,9 @@ export default function Index() {
   const { user } = useAuth();
   const [bedFilter, setBedFilter] = React.useState<'all' | 2 | 3>('all');
   const [properties, setProperties] = React.useState<Property[]>([]);
+
+  const { width } = useWindowDimensions();
+  const numColumns = width >= 768 ? 2 : 1;
 
   React.useEffect(() => {
     (async () => {
@@ -68,8 +71,7 @@ export default function Index() {
         backgroundColor: "#f5f5f5",
       }}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Welcome to Mombasa Homes</Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16 }}>
         {!user && (
           <TouchableOpacity
             onPress={() => router.push("/login")}
@@ -108,13 +110,15 @@ export default function Index() {
         data={filtered}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <Link href={{ pathname: "/units/[propId]", params: { propId: item.id } }} asChild>
-            <PropertyCard property={item} />
-          </Link>
+          <View style={{ flex: 1, maxWidth: numColumns > 1 ? '48%' : '100%' }}>
+            <Link href={{ pathname: "/units/[propId]", params: { propId: item.id } }} asChild>
+              <PropertyCard property={item} />
+            </Link>
+          </View>
         )}
         showsVerticalScrollIndicator={false}
-        numColumns={Platform.OS === 'web' ? 2 : 1}
-        columnWrapperStyle={Platform.OS === 'web' ? { justifyContent: 'space-between' } : undefined}
+        numColumns={numColumns}
+        columnWrapperStyle={numColumns > 1 ? { justifyContent: 'space-between' } : undefined}
       />
     </SafeAreaView>
   );

@@ -38,7 +38,9 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <AuthGate>
-        <Stack screenOptions={{ headerTitle: () => null, headerBackTitle: "" }} />
+        <Stack screenOptions={{ headerTitle: () => null, headerBackTitle: "" }}>
+          <Stack.Screen name="index" options={{ headerTitle: "Mombasa Homes" }} />
+        </Stack>
       </AuthGate>
     </AuthProvider>
   );

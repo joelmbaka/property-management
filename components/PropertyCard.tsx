@@ -43,10 +43,12 @@ export const PropertyCard: React.FC<Props> = ({ property, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
+    flex: 1,
     backgroundColor: "#fff",
     borderRadius: 12,
     overflow: "hidden",
     marginBottom: 16,
+    marginHorizontal: 4,
     elevation: 3,
     ...Platform.select({
       web: {
