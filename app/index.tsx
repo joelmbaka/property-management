@@ -1,7 +1,8 @@
 import React from "react";
-import { SafeAreaView, FlatList, StatusBar, View, Pressable, Text } from "react-native";
+import { SafeAreaView, FlatList, StatusBar, View, Pressable, Text, TouchableOpacity } from "react-native";
 import { PropertyCard, Property } from "../components/PropertyCard";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import { useAuth } from "../lib/AuthProvider";
 import { collection, getDocs, setDoc, doc, serverTimestamp } from "firebase/firestore";
 import { registerForPushNotificationsAsync } from "../lib/notifications";
 import { Platform } from 'react-native';
@@ -9,6 +10,8 @@ import * as Application from 'expo-application';
 import { db } from "../lib/firebase";
 
 export default function Index() {
+  const router = useRouter();
+  const { user } = useAuth();
   const [bedFilter, setBedFilter] = React.useState<'all' | 2 | 3>('all');
   const [properties, setProperties] = React.useState<Property[]>([]);
 
@@ -38,7 +41,7 @@ export default function Index() {
       registerForPushNotificationsAsync().then(async (token) => {
         if (token) {
           try {
-            await setDoc(doc(db, 'deviceTokens', token), { token, createdAt: serverTimestamp() }, { merge: true });
+            await setDoc(doc(db, 'deviceTokens', token), { token, uid: user?.uid ?? null, createdAt: serverTimestamp() }, { merge: true });
             console.log('Push token registered', token);
           } catch (e) {
             console.error('Failed to save push token', e);
@@ -59,14 +62,24 @@ export default function Index() {
     <SafeAreaView
       style={{
         flex: 1,
+        ...(Platform.OS === 'web' ? { maxWidth: 1200, width: '100%', alignSelf: 'center' } : {}),
         padding: 16,
         paddingTop: StatusBar.currentHeight || 16,
         backgroundColor: "#f5f5f5",
       }}
     >
-      <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
-        Welcome to Mombasa Homes. Choose from our rental properties
-      </Text>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Welcome to Mombasa Homes</Text>
+        {!user && (
+          <TouchableOpacity
+            onPress={() => router.push("/login")}
+            style={{ backgroundColor: "#333", paddingVertical: 6, paddingHorizontal: 14, borderRadius: 6 }}
+          >
+            <Text style={{ color: "#fff" }}>Login</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+      <Text style={{ marginBottom: 12 }}>Choose from our rental properties</Text>
       <View style={{ flexDirection: 'row', marginBottom: 12 }}>
         {(
           [
@@ -100,6 +113,8 @@ export default function Index() {
           </Link>
         )}
         showsVerticalScrollIndicator={false}
+        numColumns={Platform.OS === 'web' ? 2 : 1}
+        columnWrapperStyle={Platform.OS === 'web' ? { justifyContent: 'space-between' } : undefined}
       />
     </SafeAreaView>
   );

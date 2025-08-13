@@ -5,6 +5,10 @@ import type { Unit } from "../../components/UnitCard";
 import { BookTourModal } from "../../components/BookTourModal";
 import { ImageCarousel } from "../../components/ImageCarousel";
 import { FlatList, SafeAreaView, Text, View, ActivityIndicator } from "react-native";
+import * as WebBrowser from 'expo-web-browser';
+import Constants from 'expo-constants';
+import { useAuth } from "../../lib/AuthProvider";
+import { useRouter } from "expo-router";
 import { Property } from "../../components/PropertyCard";
 import { useEffect, useState } from "react";
 import { db } from "../../lib/firebase";
@@ -16,6 +20,8 @@ export default function UnitsScreen() {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<Unit | null>(null);
+  const { user } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -30,7 +36,7 @@ export default function UnitsScreen() {
         }
         const unitsSnap = await getDocs(collection(db, "properties", propId, "units"));
         const units = unitsSnap.docs.map((u) => ({ id: u.id, ...(u.data() as any) }));
-        setProperty({ id: snap.id, ...(snap.data() as any), units } as Property);
+        setProperty({ id: snap.id, ...(snap.data() as any), units, rentNow: (unit: Unit) => console.log('Rent now clicked for unit:', unit) } as Property);
       } catch (e) {
         console.error("Failed to load property", e);
       } finally {
@@ -66,6 +72,29 @@ export default function UnitsScreen() {
             onBookTour={(u) => {
               setSelectedUnit(u);
               setModalVisible(true);
+            }}
+            onRentNow={async (u) => {
+              if (!user) {
+                router.push('/login');
+                return;
+              }
+              try {
+                const endpoint = (Constants.expoConfig?.extra as any)?.apiEndpoint?.replace('/book-tour', '/create-checkout') ?? 'https://property-management-snowy-rho.vercel.app/api/create-checkout';
+                const resp = await fetch(endpoint, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ propId, unitId: u.id, unitNumber: u.number, amount: u.rent * 100, uid: user.uid }),
+                });
+                const { url } = await resp.json();
+                if (url) {
+                  await WebBrowser.openBrowserAsync(url);
+                } else {
+                  alert('Unable to start checkout');
+                }
+              } catch (e) {
+                console.error('Checkout error', e);
+                alert('Checkout failed');
+              }
             }}
           />
         )}

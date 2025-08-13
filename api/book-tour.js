@@ -66,9 +66,12 @@ export default async function handler(req, res) {
         });
       }
       const adminDb = getFirestore();
-      const snapshot = await adminDb.collection('deviceTokens').get();
+      const snapshot = await adminDb
+        .collection('deviceTokens')
+        .where('uid', '==', process.env.ADMIN_UID)
+        .get();
       const tokens = snapshot.docs
-        .map((d) => d.id)
+        .map((d) => d.data().token)
         .filter((t) => Expo.isExpoPushToken(t));
       console.log('Device tokens fetched:', tokens);
       if (tokens.length) {
