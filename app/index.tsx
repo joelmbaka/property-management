@@ -1,6 +1,7 @@
 import React from "react";
 import { SafeAreaView, FlatList, StatusBar, View, Pressable, Text, TouchableOpacity } from "react-native";
 import { PropertyCard, Property } from "../components/PropertyCard";
+import { PropertyCardSkeleton } from "../components/PropertyCardSkeleton";
 import { Link, useRouter } from "expo-router";
 import { useAuth } from "../lib/AuthProvider";
 import { collection, getDocs, setDoc, doc, serverTimestamp } from "firebase/firestore";
@@ -14,6 +15,7 @@ export default function Index() {
   const { user } = useAuth();
   const [bedFilter, setBedFilter] = React.useState<'all' | 2 | 3>('all');
   const [properties, setProperties] = React.useState<Property[]>([]);
+  const [loading, setLoading] = React.useState(true);
 
   const { width } = useWindowDimensions();
   const numColumns = width >= 768 ? 2 : 1;
@@ -30,8 +32,10 @@ export default function Index() {
           })
         );
         setProperties(props);
+        setLoading(false);
       } catch (e) {
         console.error("Failed to load properties", e);
+        setLoading(false);
       }
     })();
   }, []);
@@ -107,13 +111,18 @@ export default function Index() {
       </View>
 
       <FlatList
-        data={filtered}
+        data={loading ? Array.from({ length: 4 }).map((_, i) => ({ id: `skeleton-${i}` } as any)) : filtered}
+
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <View style={{ flex: 1, maxWidth: numColumns > 1 ? '48%' : '100%' }}>
-            <Link href={{ pathname: "/units/[propId]", params: { propId: item.id } }} asChild>
-              <PropertyCard property={item} />
-            </Link>
+            {loading ? (
+              <PropertyCardSkeleton />
+            ) : (
+              <Link href={{ pathname: "/units/[propId]", params: { propId: item.id } }} asChild>
+                <PropertyCard property={item} />
+              </Link>
+            )}
           </View>
         )}
         showsVerticalScrollIndicator={false}
