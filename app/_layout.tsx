@@ -1,4 +1,4 @@
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Slot, useRouter, useSegments } from "expo-router";
 import React from "react";
 import { AuthProvider, useAuth } from "../lib/AuthProvider"
 
@@ -38,9 +38,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <AuthGate>
-        <Stack screenOptions={{ headerTitle: () => null, headerBackTitle: "" }}>
-          <Stack.Screen name="index" options={{ headerTitle: "Mombasa Homes" }} />
-        </Stack>
+        <Slot />
       </AuthGate>
     </AuthProvider>
   );

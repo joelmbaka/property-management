@@ -41,11 +41,12 @@
       "apiEndpoint": "https://property-management-snowy-rho.vercel.app/api/book-tour",
       "router": {},
       "eas": {
-        "projectId": "84d39208-1108-45af-83d6-a2895316481c"
+        "projectId": "8b26766f-6280-4e1d-8d59-c0b5de8de3c6"
       }
     },
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "owner": "joelmark26"
   }
 }

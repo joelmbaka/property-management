@@ -20,7 +20,7 @@
     "@react-navigation/native": "^7.1.6",
     "@stripe/stripe-react-native": "0.45.0",
     "expo": "~53.0.20",
-    "expo-application": "^5.9.1",
+    "expo-application": "~6.1.5",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.7",
     "expo-dev-client": "~5.2.4",
